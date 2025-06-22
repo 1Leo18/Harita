@@ -1,48 +1,45 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- KONUM VERİLERİ ---
-    // Yeni konum eklemek için bu listeye bir obje eklemeniz yeterli.
-    // x ve y değerlerini bulmak için, tarayıcıda F12 ile konsolu açıp
-    // getCoordinates(event) fonksiyonunu kullanabilirsiniz. (Aşağıda tanımlı)
     const locations = [
-        {
-            x: 29, // Yüzde (%) cinsinden soldan uzaklık
-            y: 55, // Yüzde (%) cinsinden yukarıdan uzaklık
-            title: 'Suno Şehri',
+        { 
+            x: 29, 
+            y: 55, 
+            title: 'Suno Şehri', 
             description: 'Praven Krallığı\'nın kalbinde yer alan hareketli bir ticaret şehridir. Krallığın en lezzetli tereyağları burada yapılır.',
             color: '#ff6b6b' // Kırmızımsı
         },
-        {
-            x: 20,
-            y: 48,
-            title: 'Praven Kalesi',
+        { 
+            x: 20, 
+            y: 48, 
+            title: 'Praven Kalesi', 
             description: 'Kral Harlaus\'un ikamet ettiği, Praven Krallığı\'nın başkentidir. Surları ve turnuvalarıyla ünlüdür.',
             color: '#4ecdc4' // Turkuaz
         },
-        {
-            x: 51,
-            y: 52,
-            title: 'Dhirim Şehri',
+        { 
+            x: 51, 
+            y: 52, 
+            title: 'Dhirim Şehri', 
             description: 'Kıtanın tam ortasında yer alan stratejik bir şehir. Tarih boyunca birçok krallık tarafından ele geçirilmeye çalışılmıştır.',
             color: '#45b7d1' // Mavi
         },
-        {
-            x: 31,
-            y: 86,
-            title: 'Jelkala Şehri',
+        { 
+            x: 31, 
+            y: 86, 
+            title: 'Jelkala Şehri', 
             description: 'Rhodok topraklarında, denize yakın verimli bir vadide kurulmuş bir şehirdir. Güçlü arbaletçileri ile tanınır.',
             color: '#96ceb4' // Yeşil
         },
-        {
-            x: 70,
-            y: 35,
-            title: 'Curaw Kalesi',
+        { 
+            x: 70, 
+            y: 35, 
+            title: 'Curaw Kalesi', 
             description: 'Vaegir Krallığı\'nın en kuzeydeki kalelerinden biridir. Soğuk iklimi ve sert savaşçılarıyla bilinir.',
             color: '#feca57' // Sarı
         },
-        {
-            x: 80,
-            y: 60,
-            title: 'Tulga Şehri',
+        { 
+            x: 80, 
+            y: 60, 
+            title: 'Tulga Şehri', 
             description: 'Kergit Hanlığı\'nın bozkırlarında, göçebe kabilelerin toplandığı önemli bir merkezdir. At ticareti burada oldukça yaygındır.',
             color: '#ff9ff3' // Pembe
         }
@@ -62,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     zoomPanWrapper.appendChild(mapImage);
     mapContainer.appendChild(zoomPanWrapper);
 
+
     // --- DURUM DEĞİŞKENLERİ ---
     let scale = 1;
     let panX = 0;
@@ -69,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPanning = false;
     let panStart = { x: 0, y: 0 };
     const maxScale = 4;
-    const minScale = 0.5;
+    let minScale = 0.5;
 
     // --- FONKSİYONLAR ---
 
@@ -121,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTransform();
         zoomPanWrapper.style.transition = ''; // Animasyonu tekrar aktif et
     }
+
 
     function populateMap() {
         locations.forEach(loc => {
@@ -221,4 +220,4 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mapImage.complete) {
         mapImage.onload();
     }
-}); 
+});
