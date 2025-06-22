@@ -11,39 +11,46 @@ body, html {
     position: relative;
     width: 100vw;
     height: 100vh;
-    overflow: auto; /* Sadece harita alanının kaydırılmasına/yakınlaştırılmasına izin ver */
+    overflow: hidden; /* Değişiklik: Kaydırma çubuklarını kaldır, kontrolü JS'e bırak */
     cursor: grab;
+    background-color: #000; /* Harita arkasındaki boşluklar için */
 }
 
 #map-container:active {
     cursor: grabbing;
 }
 
+/* YENİ: Haritayı ve noktaları içeren, transforme edilecek katman */
+#zoom-pan-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-origin: 0 0;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Animasyon için */
+}
+
 #map-image {
-    /* Başlangıçta haritanın orijinal boyutunu korumasını sağlayabiliriz */
-    /* Kullanıcı kaydırma ve zoom yapabilir. JS ile daha gelişmiş zoom eklenebilir. */
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    max-width: none; /* Büyük haritalar için */
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Değişiklik: Haritanın kapsayıcıyı doldurmasını sağla */
+    pointer-events: none; /* Sürükleme olaylarının konteynere gitmesini sağla */
 }
 
 .map-point {
     position: absolute;
-    width: 12px;
-    height: 12px;
-    background-color: #ff4d4d;
+    width: 20px; /* Değişiklik: Boyut büyütüldü */
+    height: 20px; /* Değişiklik: Boyut büyütüldü */
+    background-color: rgba(255, 77, 77, 0.7); /* Hafif şeffaflık eklendi */
     border: 2px solid #ffffff;
     border-radius: 50%;
     cursor: pointer;
     transform: translate(-50%, -50%);
     transition: transform 0.2s ease, background-color 0.2s ease;
-    box-shadow: 0 0 10px #ff4d4d, 0 0 15px #ff4d4d;
+    box-shadow: 0 0 15px #ff4d4d, 0 0 20px #ff4d4d; /* Gölge belirginleştirildi */
 }
 
 .map-point:hover {
-    transform: translate(-50%, -50%) scale(1.6);
+    transform: translate(-50%, -50%) scale(1.5); /* Hover efekti küçültüldü */
     background-color: #ff8080;
 }
 

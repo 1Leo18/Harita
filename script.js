@@ -49,80 +49,151 @@ document.addEventListener('DOMContentLoaded', () => {
     const infoTitle = document.getElementById('info-title');
     const infoDescription = document.getElementById('info-description');
     const closeButton = document.getElementById('close-button');
+    
+    // Haritayı ve noktaları saran ve transforme edilecek olan yeni bir div oluşturuyoruz.
+    const zoomPanWrapper = document.createElement('div');
+    zoomPanWrapper.id = 'zoom-pan-wrapper';
+    zoomPanWrapper.appendChild(mapImage);
+    mapContainer.appendChild(zoomPanWrapper);
+
+    // --- DURUM DEĞİŞKENLERİ ---
+    let scale = 1;
+    let panX = 0;
+    let panY = 0;
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+    const maxScale = 4;
+    const minScale = 0.5;
 
     // --- FONKSİYONLAR ---
 
-    // Konum noktalarını haritaya yerleştir
+    function applyTransform() {
+        // Panın sınırlarını belirleyerek haritanın kaybolmasını engelle
+        const containerRect = mapContainer.getBoundingClientRect();
+        const maxPanX = containerRect.width * (scale - 1) > 0 ? (containerRect.width * (scale - 1)) / 2 + 50 : 0;
+        const maxPanY = containerRect.height * (scale - 1) > 0 ? (containerRect.height * (scale - 1)) / 2 + 50 : 0;
+
+        panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+        panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+        
+        zoomPanWrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    }
+
+    function fitMapToScreen() {
+        const containerRatio = mapContainer.clientWidth / mapContainer.clientHeight;
+        const imageRatio = mapImage.naturalWidth / mapImage.naturalHeight;
+
+        if (imageRatio > containerRatio) {
+            // Harita geniş, konteynere genişliğine göre sığdır
+            scale = mapContainer.clientWidth / mapImage.naturalWidth;
+        } else {
+            // Harita yüksek, konteynere yüksekliğine göre sığdır
+            scale = mapContainer.clientHeight / mapImage.naturalHeight;
+        }
+        
+        panX = (mapContainer.clientWidth - mapImage.naturalWidth * scale) / 2;
+        panY = (mapContainer.clientHeight - mapImage.naturalHeight * scale) / 2;
+        
+        zoomPanWrapper.style.transition = 'none'; // İlk yerleşimde animasyon olmasın
+        applyTransform();
+        zoomPanWrapper.style.transition = ''; // Animasyonu tekrar aktif et
+    }
+
     function populateMap() {
         locations.forEach(loc => {
             const point = document.createElement('div');
             point.className = 'map-point';
             point.style.left = `${loc.x}%`;
             point.style.top = `${loc.y}%`;
-            point.title = loc.title; // Mouse ile üzerine gelince ismi göster
+            point.title = loc.title;
             
             point.addEventListener('click', () => {
+                // Bilgi kutusunu göster
                 infoTitle.textContent = loc.title;
                 infoDescription.textContent = loc.description;
                 infoBox.classList.add('visible');
+
+                // Tıklanan noktaya yakınlaş
+                const targetScale = 2; // Hedef yakınlaştırma seviyesi
+                scale = Math.min(maxScale, Math.max(minScale, targetScale));
+
+                const containerRect = mapContainer.getBoundingClientRect();
+                
+                // Noktanın harita üzerindeki piksel koordinatları
+                const pointX = (loc.x / 100) * containerRect.width;
+                const pointY = (loc.y / 100) * containerRect.height;
+                
+                // Konumu merkeze getirmek için pan değerlerini hesapla
+                panX = containerRect.width / 2 - pointX * scale;
+                panY = containerRect.height / 2 - pointY * scale;
+
+                applyTransform();
             });
 
-            mapContainer.appendChild(point);
+            zoomPanWrapper.appendChild(point);
         });
     }
-
-    // Bilgi kutusunu kapat
+    
     function closeInfoBox() {
         infoBox.classList.remove('visible');
     }
 
-    // Harita üzerinde sürükleme (panning)
-    let isPanning = false;
-    let startX, startY, scrollLeft, scrollTop;
+    // --- EVENT LISTENERS ---
 
     mapContainer.addEventListener('mousedown', (e) => {
         isPanning = true;
-        mapContainer.classList.add('panning');
-        startX = e.pageX - mapContainer.offsetLeft;
-        startY = e.pageY - mapContainer.offsetTop;
-        scrollLeft = mapContainer.scrollLeft;
-        scrollTop = mapContainer.scrollTop;
-    });
-
-    mapContainer.addEventListener('mouseleave', () => {
-        isPanning = false;
-        mapContainer.classList.remove('panning');
+        panStart.x = e.clientX - panX;
+        panStart.y = e.clientY - panY;
+        mapContainer.style.cursor = 'grabbing';
     });
 
     mapContainer.addEventListener('mouseup', () => {
         isPanning = false;
-        mapContainer.classList.remove('panning');
+        mapContainer.style.cursor = 'grab';
+    });
+
+    mapContainer.addEventListener('mouseleave', () => {
+        isPanning = false;
+        mapContainer.style.cursor = 'grab';
     });
 
     mapContainer.addEventListener('mousemove', (e) => {
         if (!isPanning) return;
-        e.preventDefault();
-        const x = e.pageX - mapContainer.offsetLeft;
-        const y = e.pageY - mapContainer.offsetTop;
-        const walkX = (x - startX) * 2; // Sürükleme hızını artır
-        const walkY = (y - startY) * 2;
-        mapContainer.scrollLeft = scrollLeft - walkX;
-        mapContainer.scrollTop = scrollTop - walkY;
+        panX = e.clientX - panStart.x;
+        panY = e.clientY - panStart.y;
+        zoomPanWrapper.style.transition = 'none'; // Sürüklerken animasyon olmasın
+        applyTransform();
+        zoomPanWrapper.style.transition = '';
     });
 
-    // --- YARDIMCI FONKSİYON (KOORDİNAT BULMA) ---
-    // Konsola 'getCoordinates(event)' yazarak yeni noktaların koordinatlarını bulabilirsiniz.
-    window.getCoordinates = (e) => {
-        const rect = mapImage.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 100;
-        const y = ((e.clientY - rect.top) / rect.height) * 100;
-        console.log(`Koordinatlar: { x: ${x.toFixed(2)}, y: ${y.toFixed(2)} }`);
-    };
-    // Kullanım: Haritaya sağ tıklayıp "İncele" deyin, "Konsol" sekmesine geçin.
-    // Sonra haritada bir yere tıklarken konsola `mapImage.onclick = getCoordinates` yazın ve enter'a basın.
-    // Artık haritaya her tıkladığınızda konsolda koordinatları göreceksiniz.
+    mapContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = -e.deltaY * 0.001;
+        const newScale = Math.min(maxScale, Math.max(minScale, scale + delta));
+
+        const rect = mapContainer.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Mouse'un konumuna göre pan ayarı yaparak imlecin olduğu yerden zoom yap
+        panX = mouseX - (mouseX - panX) * (newScale / scale);
+        panY = mouseY - (mouseY - panY) * (newScale / scale);
+        
+        scale = newScale;
+        applyTransform();
+    });
+    
+    closeButton.addEventListener('click', closeInfoBox);
 
     // --- BAŞLATMA ---
-    closeButton.addEventListener('click', closeInfoBox);
-    populateMap();
+    // Harita resmi tamamen yüklendiğinde başlat
+    mapImage.onload = () => {
+        fitMapToScreen();
+        populateMap();
+    };
+    
+    // Eğer resim cache'den geldiyse onload çalışmayabilir, bu yüzden kontrol edelim
+    if (mapImage.complete) {
+        mapImage.onload();
+    }
 }); 
