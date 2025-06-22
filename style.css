@@ -38,8 +38,8 @@ body, html {
 
 .map-point {
     position: absolute;
-    width: 20px; /* Değişiklik: Boyut büyütüldü */
-    height: 20px; /* Değişiklik: Boyut büyütüldü */
+    width: 16px; /* Değişiklik: Boyut küçültüldü */
+    height: 16px; /* Değişiklik: Boyut küçültüldü */
     background-color: rgba(255, 77, 77, 0.7); /* Hafif şeffaflık eklendi */
     border: 2px solid #ffffff;
     border-radius: 50%;
@@ -50,7 +50,7 @@ body, html {
 }
 
 .map-point:hover {
-    transform: translate(-50%, -50%) scale(1.5); /* Hover efekti küçültüldü */
+    transform: translate(-50%, -50%) scale(1.3); /* Hover efekti küçültüldü */
     background-color: #ff8080;
 }
 

@@ -8,37 +8,43 @@ document.addEventListener('DOMContentLoaded', () => {
             x: 29, // Yüzde (%) cinsinden soldan uzaklık
             y: 55, // Yüzde (%) cinsinden yukarıdan uzaklık
             title: 'Suno Şehri',
-            description: 'Praven Krallığı\'nın kalbinde yer alan hareketli bir ticaret şehridir. Krallığın en lezzetli tereyağları burada yapılır.'
+            description: 'Praven Krallığı\'nın kalbinde yer alan hareketli bir ticaret şehridir. Krallığın en lezzetli tereyağları burada yapılır.',
+            color: '#ff6b6b' // Kırmızımsı
         },
         {
             x: 20,
             y: 48,
             title: 'Praven Kalesi',
-            description: 'Kral Harlaus\'un ikamet ettiği, Praven Krallığı\'nın başkentidir. Surları ve turnuvalarıyla ünlüdür.'
+            description: 'Kral Harlaus\'un ikamet ettiği, Praven Krallığı\'nın başkentidir. Surları ve turnuvalarıyla ünlüdür.',
+            color: '#4ecdc4' // Turkuaz
         },
         {
             x: 51,
             y: 52,
             title: 'Dhirim Şehri',
-            description: 'Kıtanın tam ortasında yer alan stratejik bir şehir. Tarih boyunca birçok krallık tarafından ele geçirilmeye çalışılmıştır.'
+            description: 'Kıtanın tam ortasında yer alan stratejik bir şehir. Tarih boyunca birçok krallık tarafından ele geçirilmeye çalışılmıştır.',
+            color: '#45b7d1' // Mavi
         },
         {
             x: 31,
             y: 86,
             title: 'Jelkala Şehri',
-            description: 'Rhodok topraklarında, denize yakın verimli bir vadide kurulmuş bir şehirdir. Güçlü arbaletçileri ile tanınır.'
+            description: 'Rhodok topraklarında, denize yakın verimli bir vadide kurulmuş bir şehirdir. Güçlü arbaletçileri ile tanınır.',
+            color: '#96ceb4' // Yeşil
         },
         {
             x: 70,
             y: 35,
             title: 'Curaw Kalesi',
-            description: 'Vaegir Krallığı\'nın en kuzeydeki kalelerinden biridir. Soğuk iklimi ve sert savaşçılarıyla bilinir.'
+            description: 'Vaegir Krallığı\'nın en kuzeydeki kalelerinden biridir. Soğuk iklimi ve sert savaşçılarıyla bilinir.',
+            color: '#feca57' // Sarı
         },
         {
             x: 80,
             y: 60,
             title: 'Tulga Şehri',
-            description: 'Kergit Hanlığı\'nın bozkırlarında, göçebe kabilelerin toplandığı önemli bir merkezdir. At ticareti burada oldukça yaygındır.'
+            description: 'Kergit Hanlığı\'nın bozkırlarında, göçebe kabilelerin toplandığı önemli bir merkezdir. At ticareti burada oldukça yaygındır.',
+            color: '#ff9ff3' // Pembe
         }
     ];
 
@@ -70,11 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyTransform() {
         // Panın sınırlarını belirleyerek haritanın kaybolmasını engelle
         const containerRect = mapContainer.getBoundingClientRect();
-        const maxPanX = containerRect.width * (scale - 1) > 0 ? (containerRect.width * (scale - 1)) / 2 + 50 : 0;
-        const maxPanY = containerRect.height * (scale - 1) > 0 ? (containerRect.height * (scale - 1)) / 2 + 50 : 0;
-
-        panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
-        panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+        
+        // Eğer harita minimum boyutta ise (tam ekranı kaplıyorsa), pan yapmaya izin verme
+        if (scale <= minScale) {
+            panX = (containerRect.width - mapImage.naturalWidth * scale) / 2;
+            panY = (containerRect.height - mapImage.naturalHeight * scale) / 2;
+        } else {
+            // Normal pan sınırları
+            const maxPanX = (containerRect.width * (scale - 1)) / 2;
+            const maxPanY = (containerRect.height * (scale - 1)) / 2;
+            
+            panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+            panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+        }
         
         zoomPanWrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
     }
@@ -91,6 +105,15 @@ document.addEventListener('DOMContentLoaded', () => {
             scale = mapContainer.clientHeight / mapImage.naturalHeight;
         }
         
+        // Minimum zoom seviyesini hesapla - harita hiçbir zaman siyah kenarlar göstermemeli
+        const minScaleForCoverage = Math.max(
+            mapContainer.clientWidth / mapImage.naturalWidth,
+            mapContainer.clientHeight / mapImage.naturalHeight
+        );
+        
+        // Global minScale değişkenini güncelle
+        minScale = minScaleForCoverage;
+        
         panX = (mapContainer.clientWidth - mapImage.naturalWidth * scale) / 2;
         panY = (mapContainer.clientHeight - mapImage.naturalHeight * scale) / 2;
         
@@ -106,6 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
             point.style.left = `${loc.x}%`;
             point.style.top = `${loc.y}%`;
             point.title = loc.title;
+            point.style.backgroundColor = loc.color;
+            point.style.boxShadow = `0 0 15px ${loc.color}, 0 0 20px ${loc.color}`;
             
             point.addEventListener('click', () => {
                 // Bilgi kutusunu göster
