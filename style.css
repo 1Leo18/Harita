@@ -1,0 +1,97 @@
+body, html {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #0a0a0a;
+    color: #f0f0f0;
+    overflow: hidden; /* Sayfanın tamamının kaymasını engelle */
+}
+
+#map-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto; /* Sadece harita alanının kaydırılmasına/yakınlaştırılmasına izin ver */
+    cursor: grab;
+}
+
+#map-container:active {
+    cursor: grabbing;
+}
+
+#map-image {
+    /* Başlangıçta haritanın orijinal boyutunu korumasını sağlayabiliriz */
+    /* Kullanıcı kaydırma ve zoom yapabilir. JS ile daha gelişmiş zoom eklenebilir. */
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    max-width: none; /* Büyük haritalar için */
+}
+
+.map-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #ff4d4d;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 0 10px #ff4d4d, 0 0 15px #ff4d4d;
+}
+
+.map-point:hover {
+    transform: translate(-50%, -50%) scale(1.6);
+    background-color: #ff8080;
+}
+
+#info-box {
+    position: fixed;
+    top: 20px;
+    right: -400px; /* Başlangıçta ekranın dışında */
+    width: 350px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background-color: rgba(15, 15, 15, 0.9);
+    border-left: 2px solid #cda434;
+    padding: 25px;
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    transition: right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    visibility: hidden;
+}
+
+#info-box.visible {
+    right: 0;
+    visibility: visible;
+}
+
+#close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+#close-button:hover {
+    color: #fff;
+}
+
+#info-title {
+    margin-top: 0;
+    padding-bottom: 10px;
+    color: #cda434;
+    border-bottom: 1px solid #444;
+}
+
+#info-description {
+    line-height: 1.6;
+    color: #ccc;
+} 
